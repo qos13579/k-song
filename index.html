@@ -188,19 +188,40 @@
             font-weight: bold;
             text-align: center;
         }
+/* ========================================== 📱 手機與行動版網頁終極排版校正區 ========================================== */
 @media (max-width: 600px) {
+    /* 1. 調整中央區塊上邊距，防止在手機版頂部留白過多 */
+    .container {
+        margin: 20vh auto 30px auto !important;
+        padding: 5px !important;
+    }
+    
+    /* 2. 選歌按鈕自動在手機上切換為 2 欄排版，防止 3 欄擠在一起字體重疊 */
     .song-grid {
-        grid-template-columns: repeat(2, 1fr) !important; /* 手機上自動改為 2 欄，防止按鈕太擠 */
-        gap: 10px !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
     }
+    
     .arcade-btn {
-        padding: 15px 8px !important; /* 縮小內距，符合手指點擊大小 */
-        font-size: 15px !important;   /* 稍微縮小字體防止換行爆框 */
+        padding: 16px 8px !important;
+        font-size: 16px !important;
     }
+    
+    /* 3. 歌詞盒子縮減內距與字體，防止長歌詞在手機直螢幕爆開 */
     .lyrics-box {
-        font-size: 26px !important;   /* 縮小歌詞字體，防止長歌詞在手機上塞不下 */
-        min-height: 120px !important;
-        padding: 15px !important;
+        font-size: 24px !important;
+        min-height: 110px !important;
+        padding: 12px !important;
+    }
+
+    /* 🛠️ 核心修正：解決手機提交答案卡到的終極解法 */
+    .right-bottom-dashboard {
+        position: relative !important;   /* 👈 關鍵：在手機上解除固定懸浮，改成在網頁最下方排隊 */
+        bottom: auto !important;
+        right: auto !important;
+        width: 90% !important;           /* 寬度放大到跟主畫面差不多 */
+        margin: 30px auto !important;    /* 置中對齊，並與上方答題區保持 30px 乾淨距離 */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
     }
 }
     </style>
