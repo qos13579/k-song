@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我是K歌王 - 100% 線上直連同步進階版</title>
+    <style>
+        /* ========================================== 🌐 全域網頁基礎樣式與方案 B 強制滿版背景 ========================================== */
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: url('https://files.catbox.moe/n2wxai.jpg') no-repeat center center fixed;
+            background-size: 100% 100%;
+            color: #fff;
+            text-align: center;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            min-height: 100vh;
+        }
+
+        /* ========================================== 📦 中央主要遊戲操作方塊（透明無框版） ========================================== */
+        .container {
+            width: 90%;
+            max-width: 700px;
+            margin: 35vh auto 40px auto;
+            background: transparent; 
+            padding: 10px;
+            border-radius: 0;
+            box-shadow: none;
+            border: none;
+            box-sizing: border-box;
+        }
+
+        select, input, button {
+            font-size: 20px;
+            padding: 14px;
+            margin: 10px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+        }
+
+        /* 💡 當前挑戰歌曲：純黑粗體，搭配雙重白光外發光襯底 */
+        .center-song-title {
+            font-size: 28px;
+            color: #000000;
+            font-weight: 900;
+            margin-bottom: 15px;
+            -webkit-text-stroke: 0px transparent;
+            text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.9), 0px 0px 5px rgba(255, 255, 255, 0.6);
+        }
+
+        /* ========================================== 🎛️ 3x3 街機風格按鈕選單區 ========================================== */
+        .song-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .arcade-btn {
+            padding: 20px 10px;
+            font-size: 18px;
+            color: #fff;
+            background: linear-gradient(135deg, #8e44ad, #2c3e50);
+            border: 2px solid #9b59b6;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .arcade-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            background: linear-gradient(135deg, #9b59b6, #34495e);
+            box-shadow: 0 6px 20px rgba(155, 89, 182, 0.7);
+            border-color: #00ffcc;
+        }
+
+        .arcade-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(155, 89, 182, 0.4);
+        }
+
+        /* ========================================== 💬 歌詞顯示盒子 (.lyrics-box) ========================================== */
+        .lyrics-box {
+            min-height: 150px;
+            margin: 20px 0;
+            font-size: 36px;
+            font-weight: bold;
+            color: #ff8c00; /* 💡 歌詞固定為橘色，兼顧常規深底與警告時的粉白底對比度 */
+            line-height: 1.8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 12, 30, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            border: 2px solid #9b59b6;
+        }
+
+        .lyrics-box.warning-active {
+            border: 3px dashed #fd79a8;
+            background: rgba(253, 121, 168, 0.15);
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(253, 121, 168, 0.3); }
+            100% { transform: scale(1.02); box-shadow: 0 0 25px rgba(253, 121, 168, 0.8); }
+        }
+
+        .warning-icon {
+            color: #fd79a8;
+            margin-right: 15px;
+            display: none;
+        }
+
+        .lyrics-box.warning-active .warning-icon {
+            display: inline;
+        }
+
+        .game-zone {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .input-zone {
+            display: none;
+        }
+
+        /* 💡 猜歌提示訊息：最基本藍色粗體，無黑框，無投影 */
+        #quiz-hint {
+            color: #3498db !important; 
+            font-weight: bold !important; 
+            font-size: 24px;
+            margin: 15px 0;
+            -webkit-text-stroke: 0px transparent !important; 
+            text-shadow: none !important; 
+        }
+
+        /* 💡 狀態訊息基礎樣式：移除描邊與重陰影 */
+        .status {
+            font-size: 24px;
+            margin-top: 20px;
+            font-weight: bold;
+            -webkit-text-stroke: 0px transparent !important;
+            text-shadow: none !important;
+        }
+
+        /* ========================================== 🎛️ 右下角常駐控制導播台 ========================================== */
+        .right-bottom-dashboard {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 340px;
+            background: rgba(15, 12, 30, 0.9);
+            border: 2px solid #e84393;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            text-align: left;
+            display: none;
+        }
+
+        .dashboard-title {
+            font-size: 14px;
+            color: #e84393;
+            font-weight: bold;
+            margin: 0 0 8px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .timer-tool {
+            margin-top: 10px;
+            padding: 8px 10px;
+            background: #9b59b6;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        }
+@media (max-width: 600px) {
+    .song-grid {
+        grid-template-columns: repeat(2, 1fr) !important; /* 手機上自動改為 2 欄，防止按鈕太擠 */
+        gap: 10px !important;
+    }
+    .arcade-btn {
+        padding: 15px 8px !important; /* 縮小內距，符合手指點擊大小 */
+        font-size: 15px !important;   /* 稍微縮小字體防止換行爆框 */
+    }
+    .lyrics-box {
+        font-size: 26px !important;   /* 縮小歌詞字體，防止長歌詞在手機上塞不下 */
+        min-height: 120px !important;
+        padding: 15px !important;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <!-- 🎬 全螢幕趣味倒數計時黑幕 -->
+    <div id="countdown-screen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 8, 20, 0.95); z-index: 10000; flex-direction: column; align-items: center; justify-content: center; font-family: 'Microsoft JhengHei', sans-serif;">
+        <div id="cd-song-title" style="font-size: 32px; color: #f1c40f; font-weight: bold; margin-bottom: 30px; text-shadow: 0 0 10px rgba(241,196,15,0.5);"></div>
+        <div id="cd-number" style="font-size: 120px; color: #00ffcc; font-weight: bold; text-shadow: 0 0 20px rgba(0,255,204,0.8); animation: pulse 1s infinite alternate;">3</div>
+    </div>
+
+    <div class="container">
+        <!-- 📋 階段 1：準備選歌畫面區段 -->
+        <div id="setup-zone">
+            <h3 style="color: #f1c40f; margin-top: 0; font-size: 26px; text-shadow: 2px 2px 10px rgba(0,0,0,1), -2px -2px 10px rgba(0,0,0,1);">請選擇您的挑戰關卡：</h3>
+            <div class="song-grid">
+                <button class="arcade-btn" onclick="selectAndStart(0)">🔮 校園天燈召喚術</button>
+                <button class="arcade-btn" onclick="selectAndStart(1)">🎈 巴黎香水空投包</button>
+                <button class="arcade-btn" onclick="selectAndStart(2)">💒 閃婚公所直達車</button>
+                <button class="arcade-btn" onclick="selectAndStart(3)">🌙 月球漫步觀光團</button>
+                <button class="arcade-btn" onclick="selectAndStart(4)">🚀 地心引力反抗軍</button>
+                <button class="arcade-btn" onclick="selectAndStart(5)">🌹 純情台客大禮包</button>
+                <button class="arcade-btn" onclick="selectAndStart(6)">✉️ 限時快遞對唱團</button>
+                <button class="arcade-btn" onclick="selectAndStart(7)">💪 鐵人勵志奮鬥團</button>
+                <button class="arcade-btn" onclick="selectAndStart(8)">🍯 甜蜜蜜糖果工廠</button>
+            </div>
+        </div>
+
+        <!-- 🎮 階段 2：正式猜歌遊戲區段 -->
+        <div id="game-zone" class="game-zone">
+            <div id="center-song-display" class="center-song-title"></div>
+            <div id="lyrics-display-wrapper" class="lyrics-box">
+                <span class="warning-icon">⚠️</span><span id="lyrics-display">線上串流加載中，請稍候...</span>
+            </div>
+
+            <!-- 🚨 突發猜歌歌詞輸入控制區段 -->
+            <div id="input-zone" class="input-zone">
+                <p id="quiz-hint">⚠️ 歌聲暫停！請填出上方 <b>0</b> 個字的歌詞！</p>
+                <input type="text" id="user-answer" placeholder="請輸入答案" autocomplete="off" style="border: 2px solid #9b59b6; background: #fff; color: #333; width: 65%;">
+                <button id="submit-btn" style="background: #2ecc71; color: white; box-shadow: 0 4px 10px rgba(46,204,113,0.4); cursor: pointer;">提交答案</button>
+            </div>
+            <div id="status-msg" class="status"></div>
+        </div>
+    </div>
+
+    <!-- 🎛️ 右下角控制台 -->
+    <div id="control-dashboard" class="right-bottom-dashboard">
+        <div id="playing-title" class="dashboard-title">正在播放...</div>
+        <audio id="my-audio" controls style="width: 100%; margin: 0 auto; display: block;"></audio>
+        <div class="timer-tool">
+            🔧 工具 ➔ 當前音樂秒數：<span id="current-seconds">0.0</span> 秒
+        </div>
+    </div>
+
+    <script>
+        // 🔗 6 首歌曲直連音訊網址（變數名稱與底層載入完全同步綁定）
+        const songDatabase = [
+            { 
+                title: "田馥甄 - 小幸運", 
+                onlineMusicUrl: "https://files.catbox.moe/uq6ksk.m4a", 
+                startTime: "1:25", 
+                endTime: "2:19", 
+                resumeDelay: 3000, 
+                lyrics: [
+                    { time: 85, text: "原來你是我最想留住的幸運" },
+                    { time: 91, text: "原來我們和愛情曾經靠得那麼近" },
+                    { time: 97, text: "那為我對抗世界的決定" },
+                    { time: 102, text: "那陪我淋的雨" },
+                    { time: 105, text: "一幕幕都是你" },
+                    { time: 108, text: "[一塵不染的真心]" },
+                    { time: 112, text: "與你相遇 好幸運" },
+                    { time: 115, text: "可我已失去為力淚流滿面的權利" },
+                    { time: 121, text: "朝著在我看不到的天際" },
+                    { time: 125, text: "你張開了雙翼" },
+                    { time: 129, text: "遇見你的注定" },
+                    { time: 133, text: "她會有多幸運" }
+                ]
+            },
+            { 
+                title: "周杰倫 - 告白氣球", 
+                onlineMusicUrl: "https://files.catbox.moe/5bcu6v.m4a", 
+                startTime: "2:30", 
+                endTime: "3:28", 
+                resumeDelay: 3000, 
+                lyrics: [
+                    { time: 150, text: "親愛的 愛上你 從那天起" },
+                    { time: 156, text: "甜蜜得很輕易" },
+                    { time: 160, text: "親愛的 別任性 你的眼睛" },
+                    { time: 167, text: "在說我願意" },
+                    { time: 171, text: "親愛的 愛上你 戀愛日記" },
+                    { time: 177, text: "[飄香水的回憶]" },
+                    { time: 182, text: "一整瓶 的夢境 全都有你" },
+                    { time: 188, text: "攪拌在一起" },
+                    { time: 191, text: "親愛的別任性 你的眼睛" },
+                    { time: 201, text: "在說我願意" }
+                ]
+            },
+            { 
+                title: "陶喆 & 蔡依林 - 今天妳要嫁給我", 
+                onlineMusicUrl: "https://files.catbox.moe/iihyl6.m4a", 
+                startTime: "2:29", 
+                endTime: "3:35", 
+                resumeDelay: 1000, 
+                lyrics: [
+                    { time: 149, text: "冬天的憂傷 接續秋天的孤單" },
+                    { time: 154, text: "微風吹來苦樂的思念 I'M MISSIN' YOU" },
+                    { time: 159, text: "鳥兒的高歌 唱著不要別離" },
+                    { time: 164, text: "此刻我多麼想要擁抱你" },
+                    { time: 167, text: "聽我說" },
+                    { time: 170, text: "手牽手 跟我一起走" },
+                    { time: 174, text: "過著安定的生活" },
+                    { time: 180, text: "昨天已來不及" },
+                    { time: 183, text: "明天就會可惜" },
+                    { time: 186, text: "[今天妳要嫁給我]" },
+                    { time: 189, text: "聽我說" },
+                    { time: 191, text: "手牽手 我們一起走" },
+                    { time: 196, text: "把妳一生交給我" },
+                    { time: 201, text: "離開不要回頭 明天要到白首" },
+                    { time: 207, text: "今天妳要嫁給我" }
+                ]
+            },
+            { 
+                title: "鄧麗君 - 月亮代表我的心", 
+                onlineMusicUrl: "https://files.catbox.moe/pi85nc.m4a", 
+                startTime: "0:40", 
+                endTime: "1:52", 
+                resumeDelay: 1000, 
+                lyrics: [
+                    { time: 40, text: "你問我愛你有多深" },
+                    { time: 45, text: "我愛你有幾分" },
+                    { time: 50, text: "我的情不移 我的愛不變" },
+                    { time: 57, text: "[月亮代表我的心]" },
+                    { time: 63, text: "輕輕的一個吻 已經打動我的心" },
+                    { time: 76, text: "深深的一段情 叫我思念到如今" },
+                    { time: 90, text: "你問我愛你有多深 我愛你有幾分" },
+                    { time: 102, text: "你去想一想 你去看一看" },
+                    { time: 108, text: "月亮代表我的心" }
+                ]
+            },
+            { 
+                title: "五月天 - 離開地球表面", 
+                onlineMusicUrl: "https://files.catbox.moe/tvvcm1.m4a", 
+                startTime: "1:56", 
+                endTime: "2:40", 
+                resumeDelay: 1000, 
+                lyrics: [
+                    { time: 116, text: "丟掉手錶 丟外套" },
+                    { time: 118, text: "丟掉背包 再丟嘮叨" },
+                    { time: 122, text: "丟掉電視 丟電腦" },
+                    { time: 126, text: "丟掉大腦 再丟煩惱" },
+                    { time: 129, text: "野心大 膽子小" },
+                    { time: 133, text: "跳舞還要靠別人教" },
+                    { time: 136, text: "恨得多 愛得少" },
+                    { time: 140, text: "只想越跳越瘋 越跳越高 把地球甩掉" },
+                    { time: 147, text: "[一顆心噗通噗通的狂跳]" },
+                    { time: 150, text: "一瞬間煩惱煩惱煩惱全忘掉" },
+                    { time: 154, text: "我再也不要 再也不要" },
+                    { time: 158, text: "委屈自己一秒" }
+                ]
+            },
+            { 
+                title: "玖壹壹 - 癡情玫瑰花", 
+                onlineMusicUrl: "https://files.catbox.moe/5yau4w.m4a", 
+                startTime: "1:15", 
+                endTime: "1:50", 
+                resumeDelay: 1000, 
+                lyrics: [
+                    { time: 75, text: "我對你的愛是真正有影" },
+                    { time: 78, text: "就連厝邊隔壁攏來探聽" },
+                    { time: 82, text: "不驚好朋友笑阮是憨孩" },
+                    { time: 85, text: "誰叫我愛你 沒有辦法" },
+                    { time: 96, text: "[開車送你九十九朵玫瑰花]" },
+                    { time: 100, text: "我要唱心內的話乎你聽" },
+                    { time: 103, text: "我愛你我願意你不用怕" },
+                    { time: 107, text: "真正的癡情男子漢置這" }
+                ]
+            },
+            { 
+                title: "伍佰 & 萬芳 - 愛情限時批", 
+                onlineMusicUrl: "https://files.catbox.moe/8qpgd5.m4a", 
+                startTime: "0:32", 
+                endTime: "1:09", 
+                resumeDelay: 1000, 
+                lyrics: [ 
+                    { time: 32, text: "要安怎對妳說出心內話" }, 
+                    { time: 36, text: "說我每日恰想嘛妳一個" }, 
+                    { time: 40, text: "心情親像春天的風在吹" }, 
+                    { time: 44.5, text: "[只好寫著一張愛情的限時批]" }, 
+                    { time: 49, text: "啊～ (男)啊～ (合)啊～" }, 
+                    { time: 54.5, text: "批紙才會完全來表達我的意愛" }, 
+                    { time: 59, text: "你的溫柔 你的可愛" }, 
+                    { time: 61, text: "妳的美麗 妳的風采" }, 
+                    { time: 63, text: "給我墜落你無邊的情海" } 
+                ] 
+            },
+            {
+                title: "葉啟田 - 愛拚才會贏",
+                onlineMusicUrl: "https://files.catbox.moe/5bn3yt.m4a", /* 👈 待填入音訊直連網址 */
+                startTime: "0:50",
+                endTime: "1:20",
+                resumeDelay: 1000,
+                lyrics: [
+                    { time: 51, text: "人生可比是海上的波浪" },
+                    { time: 56, text: "有時起 有時落" },
+                    { time: 61, text: "好運 (好運) 歹運 (歹運)" },
+                    { time: 66, text: "總嘛要照起工來行" },
+                    { time: 70, text: "[三分天注定]" }, // 猜歌題目設定點！
+                    { time: 74, text: "七分靠打拚" },
+                    { time: 77, text: "愛拚才會贏" }
+                ]
+            }
+,
+            {
+                title: "鄧麗君 - 甜蜜蜜",
+                onlineMusicUrl: "https://files.catbox.moe/3lzfjk.m4a", /* 👈 待填入音訊直連網址 */
+                startTime: "0:34",
+                endTime: "1:22",
+                resumeDelay: 1000,
+                lyrics: [
+                    { time: 34, text: "在那裡 在那裡見過你" },
+                    { time: 41, text: "你的笑容這樣熟悉" },
+                    { time: 46, text: "我一時想不起" },
+                    { time: 53, text: "啊～ 在夢裡" },
+                    { time: 60, text: "[夢裡 夢裡見過你]" }, 
+                    { time: 68, text: "甜蜜 笑得多甜蜜" },
+                    { time: 75, text: "是你 是你 夢見的就是你" }
+                ]
+            }
+
+        ];
+
+        let currentSong = null;
+        let currentLineIndex = -1;
+        let answeredLines = new Set();
+        let isFinished = false;
+        let isWaitingResume = false;
+        let isQuizActive = false;
+
+        const audio = document.getElementById('my-audio');
+        const lyricsDisplay = document.getElementById('lyrics-display');
+        const lyricsBox = document.getElementById('lyrics-display-wrapper');
+        const inputZone = document.getElementById('input-zone');
+        const quizHint = document.getElementById('quiz-hint');
+        const userAnswer = document.getElementById('user-answer');
+        const submitBtn = document.getElementById('submit-btn');
+        const statusMsg = document.getElementById('status-msg');
+        const currentSecondsSpan = document.getElementById('current-seconds');
+        const controlDashboard = document.getElementById('control-dashboard');
+        const centerSongDisplay = document.getElementById('center-song-display');
+
+        function parseTimeToSeconds(timeStr) {
+            if (!timeStr) return 0;
+            const parts = timeStr.toString().split(':');
+            if (parts.length === 2) {
+                return parseInt(parts[0], 10) * 60 + parseFloat(parts[1]);
+            }
+            return parseFloat(timeStr) || 0;
+        }
+
+        function playWarningBeep() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.15);
+            } catch (e) {
+                console.log("音訊未允許");
+            }
+        }
+
+        function selectAndStart(selectedIdx) {
+            currentSong = songDatabase[selectedIdx];
+            const cdScreen = document.getElementById('countdown-screen');
+            const cdTitle = document.getElementById('cd-song-title');
+            const cdNumber = document.getElementById('cd-number');
+
+            cdTitle.innerText = `🎤 即將挑戰：${currentSong.title}`;
+            cdNumber.innerText = "3";
+            cdScreen.style.display = 'flex';
+
+            setTimeout(() => { cdNumber.innerText = "2"; }, 1000);
+            setTimeout(() => { cdNumber.innerText = "1"; }, 2000);
+            setTimeout(() => { cdNumber.innerText = "🔥 START!"; }, 3000);
+
+            setTimeout(() => {
+                cdScreen.style.display = 'none';
+                currentLineIndex = -1;
+                answeredLines.clear();
+                isFinished = false;
+                isWaitingResume = false;
+                isQuizActive = false;
+                statusMsg.innerText = "";
+                userAnswer.value = "";
+                userAnswer.disabled = false;
+                submitBtn.disabled = false;
+                inputZone.style.display = 'none';
+                lyricsBox.classList.remove('warning-active');
+
+                if (currentSong.lyrics && currentSong.lyrics[0]) {
+                    const firstLineText = currentSong.lyrics[0].text;
+                    lyricsDisplay.innerText = firstLineText.replace('[', '').replace(']', '');
+                }
+
+                document.getElementById('playing-title').innerText = `🎵 挑戰歌曲：${currentSong.title}`;
+                centerSongDisplay.innerText = `🎤 當前挑戰：${currentSong.title}`;
+                document.getElementById('setup-zone').style.display = 'none';
+                document.getElementById('game-zone').style.display = 'block';
+                controlDashboard.style.display = 'block';
+
+                const startSec = parseTimeToSeconds(currentSong.startTime);
+                audio.src = currentSong.onlineMusicUrl;
+                audio.load();
+
+                audio.onerror = function() {
+                    lyricsDisplay.style.fontSize = "22px";
+                    lyricsDisplay.style.color = "#ff7675";
+                    lyricsDisplay.innerText = "❌ 線上音樂下載出錯！請檢查網際網路狀態與網址權限！";
+                };
+
+                audio.onloadedmetadata = function() {
+                    lyricsDisplay.style.fontSize = "36px";
+                    lyricsDisplay.style.color = "#ff8c00"; 
+                    audio.currentTime = startSec;
+                    currentSecondsSpan.innerText = startSec.toFixed(1);
+                    audio.play().then(() => {
+                        audio.currentTime = startSec;
+                    }).catch(error => {
+                        lyricsDisplay.innerText = "🔊 瀏覽器阻擋自動播放！請點選右下角導播台的 ▶️ 鍵開始挑戰！";
+                    });
+                };
+            }, 3500);
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            if (!currentSong || isFinished || isWaitingResume || isQuizActive) return;
+            const currentTime = audio.currentTime;
+            currentSecondsSpan.innerText = currentTime.toFixed(1);
+            
+            const endSec = parseTimeToSeconds(currentSong.endTime);
+            if (currentTime >= endSec) {
+                audio.pause();
+                isFinished = true;
+                lyricsBox.classList.remove('warning-active');
+                
+                statusMsg.style.color = "#1565c0"; 
+                lyricsDisplay.innerText = "🏁 本首歌曲挑戰結束！";
+                statusMsg.innerHTML = "請重新整理網頁挑戰其他歌曲。";
+                return;
+            }
+
+            const lines = currentSong.lyrics;
+            let foundIndex = -1;
+            for (let i = 0; i < lines.length; i++) {
+                if (currentTime >= lines[i].time) {
+                    foundIndex = i;
+                }
+            }
+
+            if (foundIndex !== -1 && currentLineIndex !== foundIndex) {
+                currentLineIndex = foundIndex;
+                checkAndShowLyrics(lines[currentLineIndex], foundIndex);
+            }
+        });
+
+        function checkAndShowLyrics(lineData, index) {
+            const lines = currentSong.lyrics;
+            const rawText = lineData.text;
+            const match = rawText.match(/\[(.*?)\]/);
+            
+            let isIncomingQuiz = false;
+            if (index + 1 < lines.length && lines[index + 1].text.includes('[') && !answeredLines.has(index + 1)) isIncomingQuiz = true;
+            if (index + 2 < lines.length && lines[index + 2].text.includes('[') && !answeredLines.has(index + 2)) isIncomingQuiz = true;
+
+            if (isIncomingQuiz) {
+                if (!lyricsBox.classList.contains('warning-active')) {
+                    lyricsBox.classList.add('warning-active');
+                    playWarningBeep();
+                }
+            } else {
+                lyricsBox.classList.remove('warning-active');
+            }
+
+            if (match && !answeredLines.has(index)) {
+                isQuizActive = true;
+                audio.pause();
+                lyricsBox.classList.remove('warning-active');
+                
+                const quizKey = match[1];
+                const os = "O".repeat(quizKey.length);
+                const hiddenText = rawText.replace(`[${quizKey}]`, os);
+                
+                lyricsDisplay.innerText = hiddenText;
+                quizHint.innerHTML = `⚠️ 歌聲暫停！請填出上方 <b>${quizKey.length}</b> 個字的歌詞！`;
+                inputZone.style.display = 'block';
+                userAnswer.value = "";
+                userAnswer.disabled = false;
+                submitBtn.disabled = false;
+                
+                lineData.computedKey = quizKey;
+                lineData.cleanText = rawText.replace('[', '').replace(']', '');
+                answeredLines.add(index);
+                
+                setTimeout(() => {
+                    userAnswer.focus();
+                }, 50);
+            } else {
+                lyricsDisplay.innerText = rawText.replace('[', '').replace(']', '');
+            }
+        }
+
+        document.getElementById('submit-btn').addEventListener('click', checkAnswer);
+        userAnswer.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkAnswer();
+        });
+
+        function checkAnswer() {
+            if (!isQuizActive || isWaitingResume) return;
+            const lineData = currentSong.lyrics[currentLineIndex];
+            const guess = userAnswer.value.trim();
+
+            if (guess === lineData.computedKey) {
+                statusMsg.style.color = "#1b5e20";
+                statusMsg.innerText = "🎉 答對了！太厲害了！";
+            } else {
+                statusMsg.style.color = "#b71c1c";
+                statusMsg.innerText = `❌ 答錯囉！正確答案是：${lineData.computedKey}`;
+            }
+            closeQuizAndResume(lineData);
+        }
+
+        function closeQuizAndResume(lineData) {
+            isWaitingResume = true;
+            userAnswer.disabled = true;
+            submitBtn.disabled = true;
+            lyricsDisplay.innerText = lineData.cleanText;
+            inputZone.style.display = 'none';
+
+            setTimeout(() => {
+                statusMsg.innerText = "";
+                isWaitingResume = false;
+                isQuizActive = false;
+                const endSec = parseTimeToSeconds(currentSong.endTime);
+                if (audio.currentTime < endSec && !isFinished) {
+                    audio.play().catch(() => {});
+                }
+            }, currentSong.resumeDelay);
+        }
+    </script>
+</body>
+</html>
